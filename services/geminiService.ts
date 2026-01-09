@@ -1,13 +1,13 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { AIResponse, GeoLocation } from '../types';
+import { AIResponse, GeoLocation } from '../types.ts';
 
 export const geminiService = {
   /**
    * Use Gemini 2.5 Flash with Maps grounding to find office coordinates
    */
   lookupOffice: async (query: string, userLoc?: GeoLocation): Promise<AIResponse> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const config: any = {
       tools: [{ googleMaps: {} }],
@@ -53,7 +53,7 @@ export const geminiService = {
    * Use Gemini Pro to analyze attendance patterns
    */
   analyzeAttendance: async (history: any[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `Analyze these office attendance logs and provide a short summary of consistency and average hours if possible: ${JSON.stringify(history)}`;
     
     try {

@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { storageService } from './services/storageService';
-import { UserState, GeoLocation, AttendanceRecord } from './types';
-import { calculateDistance, formatDistance } from './utils/geoUtils';
-import OfficeSetup from './components/OfficeSetup';
-import AttendanceCard from './components/AttendanceCard';
-import AttendanceLogs from './components/AttendanceLogs';
-import AIAssistant from './components/AIAssistant';
+import { storageService } from './services/storageService.ts';
+import { UserState, GeoLocation, AttendanceRecord } from './types.ts';
+import { calculateDistance, formatDistance } from './utils/geoUtils.ts';
+import OfficeSetup from './components/OfficeSetup.tsx';
+import AttendanceCard from './components/AttendanceCard.tsx';
+import AttendanceLogs from './components/AttendanceLogs.tsx';
+import AIAssistant from './components/AIAssistant.tsx';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<UserState>(storageService.getData());
