@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { geminiService } from '../services/geminiService.ts';
 import { storageService } from '../services/storageService.ts';
 import { GeoLocation, OfficeConfig } from '../types.ts';
@@ -13,6 +13,7 @@ interface Props {
 const OfficeSetup: React.FC<Props> = ({ onComplete, userLoc }) => {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ text: string; urls: any[] } | null>(null);
   const [parsingStep, setParsingStep] = useState(false);
   const [selectedLoc, setSelectedLoc] = useState<GeoLocation | null>(null);
@@ -22,19 +23,35 @@ const OfficeSetup: React.FC<Props> = ({ onComplete, userLoc }) => {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query) return;
+    
     setLoading(true);
-    const res = await geminiService.lookupOffice(query, userLoc || undefined);
-    setResult({ text: res.text, urls: res.groundingUrls || [] });
-    setParsingStep(true);
-    setLoading(false);
-    setOfficeName(query);
+    setError(null);
+    
+    try {
+      const res = await geminiService.lookupOffice(query, userLoc || undefined);
+      
+      if (res.text.startsWith("Error:")) {
+        setError(res.text);
+        setLoading(false);
+        return;
+      }
+
+      setResult({ text: res.text, urls: res.groundingUrls || [] });
+      setOfficeName(query);
+      setParsingStep(true);
+    } catch (err: any) {
+      setError("An unexpected error occurred while searching. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCaptureLocation = () => {
     if (userLoc) {
       setSelectedLoc(userLoc);
     } else {
-      alert("Unable to detect your current location. Please ensure GPS is enabled.");
+      alert("Unable to detect your current location. Please ensure GPS is enabled in your browser/device settings.");
     }
   };
 
@@ -92,6 +109,14 @@ const OfficeSetup: React.FC<Props> = ({ onComplete, userLoc }) => {
                   )}
                 </button>
               </div>
+              
+              {error && (
+                <div className="mt-4 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700 text-sm">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                  <p>{error}</p>
+                </div>
+              )}
+
               <p className="mt-3 text-xs text-slate-400 flex items-center gap-1">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM5.879 4.464a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zM17.657 5.879a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM10 8a2 2 0 100 4 2 2 0 000-4zM11 13a1 1 0 10-2 0v1a1 1 0 102 0v-1zM5.879 14.121l-.707.707a1 1 0 001.414 1.414l.707-.707a1 1 0 00-1.414-1.414zM15.536 14.121l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zM3 10a1 1 0 011-1h1a1 1 0 110 2H4a1 1 0 01-1-1zM15 10a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1z" /></svg>
                 Gemini assists in validating your office identity.
