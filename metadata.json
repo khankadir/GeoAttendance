@@ -1,0 +1,7 @@
+{
+  "name": "GeoAttend AI",
+  "description": "An intelligent auto-attendance system utilizing geo-fencing and Gemini Maps grounding to verify office presence and manage employee logs.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
